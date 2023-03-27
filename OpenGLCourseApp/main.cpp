@@ -44,17 +44,68 @@ static const char* lightFshader = "Shaders/LightShader.frag";
 
 
 
-void calAverageNormal(unsigned int* indices, unsigned int indicesCount, unsigned int* vertices, unsigned int verticesCount,
+void calAverageNormal(unsigned int* indices, unsigned int indicesCount, GLfloat* vertices, unsigned int verticesCount,
 	unsigned int verticesLenght, unsigned int normalOffset) 
 {
 	for (size_t i = 0; i < indicesCount; i+=6)
 	{
-		unsigned int in0 = indices[i] * verticesLenght;
+		unsigned int in0 = indices[i]   * verticesLenght;
 		unsigned int in1 = indices[i+1] * verticesLenght;
 		unsigned int in2 = indices[i+2] * verticesLenght;
 		unsigned int in3 = indices[i+3] * verticesLenght;
 		unsigned int in4 = indices[i+4] * verticesLenght;
 		unsigned int in5 = indices[i+5] * verticesLenght;
+		glm::vec3 v1(vertices[in4] - vertices[in0], vertices[in4 + 1] - vertices[in0 + 1], vertices[in4 + 2] - vertices[in0 + 2]);
+		glm::vec3 v2(vertices[in2] - vertices[in0], vertices[in2 + 1] - vertices[in0 + 1], vertices[in2 + 2] - vertices[in0 + 2]);
+		glm::vec3 normal = glm::cross(v1, v2); // corss product gets us the prop perpendicular direction line
+		normal = glm::normalize(normal); // normalize the normal 
+
+		// jump to normals 
+		in0 += normalOffset;
+		in1 += normalOffset;
+		in2 += normalOffset;
+		in3 += normalOffset;
+		in4 += normalOffset;
+		in5 += normalOffset;
+
+		//vertices 0
+		vertices[in0] += normal.x;
+		vertices[in0] += normal.y;
+		vertices[in0] += normal.z;
+
+		//vertices 1
+		vertices[in1] += normal.x;
+		vertices[in1] += normal.y;
+		vertices[in1] += normal.z;
+
+		//vertices 2
+		vertices[in2] += normal.x;
+		vertices[in2] += normal.y;
+		vertices[in2] += normal.z;
+
+		//vertices 3
+		vertices[in3] += normal.x;
+		vertices[in3] += normal.y;
+		vertices[in3] += normal.z;
+
+		//vertices 4
+		vertices[in4] += normal.x;
+		vertices[in4] += normal.y;
+		vertices[in4] += normal.z;
+		//vertices 5
+		vertices[in5] += normal.x;
+		vertices[in5] += normal.y;
+		vertices[in5] += normal.z;
+	}
+	for (size_t i = 0; i < verticesCount / verticesLenght; i++)
+	{
+		unsigned int nOffset = i * verticesLenght + normalOffset;
+		glm::vec3 vec(vertices[nOffset], vertices[nOffset + 1], vertices[nOffset + 2]);
+		vec = glm::normalize(vec);
+		vertices[nOffset] = vec.x;
+		vertices[nOffset] = vec.y;
+		vertices[nOffset] = vec.z;
+
 	}
 
 }
@@ -80,6 +131,7 @@ void CreateObjects()
 	};
 
 
+	//model from blender comes with normals
 
 
 	// Define cube vertices and texture coordinates
@@ -106,14 +158,14 @@ void CreateObjects()
 		 0.5f, -0.5f, -0.5f, 1.0f, 1.0f,  0.0f,0.0f,0.f,/// Bottom-right
 		 0.5f, -0.5f,  0.5f, 0.0f, 1.0f,  0.0f,0.0f,0.f,/// Bottom-left
 		 // Top face
-		 -0.5f,  0.5f,  0.5f, 0.0f, 1.0f,  0.0f,0.0f,0.f,/// Bottom-left
-		  0.5f,  0.5f,  0.5f, 1.0f, 1.0f,  0.0f,0.0f,0.f,/// Bottom-right
-		  0.5f,  0.5f, -0.5f, 1.0f, 0.0f,  0.0f,0.0f,0.f,/// Top-right
+		 -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f,0.0f,0.f,/// Bottom-left
+		  0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f,0.0f,0.f,/// Bottom-right
+		  0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f,0.0f,0.f,/// Top-right
 		 -0.5f, 0.5f, -0.5f, 0.0f, 0.0f,  0.0f,0.0f,0.f,/// Top-left
 			// Bottom face
-		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0.0f,0.0f,0.f, // Top-left
+		 -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,  0.0f,0.0f,0.f, // Top-left
 		  0.5f, -0.5f, 0.5f, 1.0f, 0.0f,  0.0f,0.0f,0.f,/// Top-right
-		  0.5f, -0.5f, -0.5f, 1.0f, 1.0f,  0.0f,0.0f,0.f,/// Bottom-right
+		  0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,0.0f,0.f,/// Bottom-right
 		 -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f,0.0f,0.f// Bottom-left
 	};
 	// creating an object of the mesh and passing in cube vertices and indices, number of elements have also been passed in 
@@ -150,7 +202,7 @@ void CreateObjects()
 	};
 
 
-
+	calAverageNormal(indices, sizeof(indices) / sizeof(indices[0]), Cubevertices, sizeof(Cubevertices) / sizeof(Cubevertices[0]), 8, 5);
 
 
 	Mesh *obj1 = new Mesh();
@@ -159,7 +211,11 @@ void CreateObjects()
 	Mesh* LightObject = new Mesh();
 	LightObject->CreateMesh(lightVertices,lightIndices , sizeof(lightVertices) / sizeof(lightVertices[0]), sizeof(lightIndices) / sizeof(lightIndices[0]));
 	meshList.push_back(LightObject);
-
+	//for (int i = 0; i < sizeof(Cubevertices) / sizeof(Cubevertices[0]); i++) {
+	//	std::cout << Cubevertices[i] << "|";
+	//	if (i%7 == 0)
+	//		std::cout << std::endl;
+	//}
 }
 
 void CreateShaders()
@@ -182,9 +238,14 @@ int main()
 
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.5f);
 
-	texture1 = Texture("Texture/1.jpg");
+	texture1 = Texture("Texture/wall.jpg");
 	texture1.loadTexture();
-	dirLight = ALight(1.0f,1.0f,1.0f,0.5,2.0f,-1.0f,-2.0f,1.0f);
+	dirLight = ALight(1.0f, 1.0f, 1.0f, 0.2f,2.0f, -1.0f, -2.0f, 1.0f);
+
+
+
+
+
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformAmbientColor = 0, uniformAmbientIntensity = 0, uniformDirection = 0,
 		uniformDiffuseIntensity = 0;
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 100.0f);
