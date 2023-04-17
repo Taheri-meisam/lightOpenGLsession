@@ -10,7 +10,7 @@ Texture::Texture()
 	fileLocation = " "; // where the file is located in your project folder // example ::   /texture/wood.jpg
 }
 // pass in the address and filename of your image( jpp, png or other formats) when you create an object of texture class
-Texture::Texture(char* fileLoc)
+Texture::Texture(const char* fileLoc)
 {
 	textureID = 0;
 	width = 0;
@@ -47,6 +47,38 @@ void Texture::loadTexture()
 	}
 //	glBindTexture(GL_TEXTURE_2D, 0);
 	stbi_image_free(texdata);
+}
+
+bool Texture::LoadTextureM()
+{
+	unsigned char* texdata = stbi_load(fileLocation, &width, &height, &bitDepth, 0);
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID); // we bind the texture here 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //S Axis // we want to repeat the texture to fill the mesh 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // T Axis
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // we apply filters for min and mag as a linear 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindTexture(GL_TEXTURE_2D, 0); // we unbind the texture 
+
+	if (texdata)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texdata);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		printf("Failed to load texture \n");
+		return false;
+	}
+	//	glBindTexture(GL_TEXTURE_2D, 0);
+	stbi_image_free(texdata);
+	return true;
+}
+
+bool Texture::LoadTextureA()
+{
+	return false;
 }
 
 void Texture::useTexture()

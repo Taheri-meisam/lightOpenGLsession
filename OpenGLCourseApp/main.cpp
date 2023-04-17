@@ -18,6 +18,8 @@
 #include "Camera.h"
 #include "Texture.h"
 #include "ALight.h"
+#include <assimp/Importer.hpp>
+#include "Model.h"
 
 const float toRadians = 3.14159265f / 180.0f;
 
@@ -41,7 +43,7 @@ static const char* lightVshader = "Shaders/LightShader.vert";
 
 // Fragment Shader
 static const char* lightFshader = "Shaders/LightShader.frag";
-
+Model airplane;
 
 
 void calAverageNormal(unsigned int* indices, unsigned int indicesCount, GLfloat* vertices, unsigned int verticesCount,
@@ -243,13 +245,13 @@ int main()
 	dirLight = ALight(1.0f, 1.0f, 1.0f, 0.2f,2.0f, -1.0f, -2.0f, 1.0f);
 
 
-
+	airplane = Model();
+	airplane.LoadModel("Models/14082_WWII_Plane_Japan_Kawasaki_Ki-61_v1_L2.obj");
 
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformAmbientColor = 0, uniformAmbientIntensity = 0, uniformDirection = 0,
 		uniformDiffuseIntensity = 0;
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 100.0f);
-
 	// Loop until window closed
 	while (!mainWindow.getShouldClose())
 	{
@@ -289,6 +291,15 @@ int main()
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 		meshList[0]->RenderMesh();
 		glUseProgram(0);
+
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 1.0f, -2.5f));
+		model = glm::scale(model, glm::vec3(0.004f, 0.004f, 0.004f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		airplane.RenderModel();
+		glUseProgram(0);
+
 
 		mainWindow.swapBuffers();
 	}
