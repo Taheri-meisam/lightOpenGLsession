@@ -59,7 +59,7 @@ void calAverageNormal(unsigned int* indices, unsigned int indicesCount, GLfloat*
 		unsigned int in5 = indices[i+5] * verticesLenght;
 		glm::vec3 v1(vertices[in4] - vertices[in0], vertices[in4 + 1] - vertices[in0 + 1], vertices[in4 + 2] - vertices[in0 + 2]);
 		glm::vec3 v2(vertices[in2] - vertices[in0], vertices[in2 + 1] - vertices[in0 + 1], vertices[in2 + 2] - vertices[in0 + 2]);
-		glm::vec3 normal = glm::cross(v1, v2); // corss product gets us the prop perpendicular direction line
+		glm::vec3 normal = glm::cross(v1, v2); // corss product gets us the perpendicular direction line
 		normal = glm::normalize(normal); // normalize the normal 
 
 		// jump to normals 
@@ -213,11 +213,11 @@ void CreateObjects()
 	Mesh* LightObject = new Mesh();
 	LightObject->CreateMesh(lightVertices,lightIndices , sizeof(lightVertices) / sizeof(lightVertices[0]), sizeof(lightIndices) / sizeof(lightIndices[0]));
 	meshList.push_back(LightObject);
-	//for (int i = 0; i < sizeof(Cubevertices) / sizeof(Cubevertices[0]); i++) {
-	//	std::cout << Cubevertices[i] << "|";
-	//	if (i%7 == 0)
-	//		std::cout << std::endl;
-	//}
+	for (int i = 0; i < sizeof(Cubevertices) / sizeof(Cubevertices[0]); i++) {
+		std::cout << Cubevertices[i] << "|";
+		if (i%7 == 0)
+			std::cout << std::endl;
+	}
 }
 
 void CreateShaders()
@@ -232,7 +232,7 @@ void CreateShaders()
 
 int main() 
 {
-	mainWindow = Window(800, 600);
+	mainWindow = Window(1080, 800);
 	mainWindow.Initialise();
 
 	CreateObjects();
@@ -240,9 +240,9 @@ int main()
 
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.5f);
 
-	texture1 = Texture("Texture/wall.jpg");
+	texture1 = Texture("Texture/1.jpg");
 	texture1.loadTexture();
-	dirLight = ALight(1.0f, 1.0f, 1.0f, 0.2f,2.0f, -1.0f, -2.0f, 1.0f);
+	dirLight = ALight(1.0f, 1.0f, 1.0f, 0.8f,2.0f, -1.0f, -2.0f, 1.0f);
 
 
 	airplane = Model();
